@@ -7,6 +7,7 @@ import { LessThan, MoreThan, Repository } from 'typeorm';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderRulesService } from './order-rules/order-rules.service';
 import { OrderPreparationEstimateService } from './order-preparation-estimate/order-preparation-estimate.service';
+import { OrderPriorityService } from './order-priority.service';
 
 @Injectable()
 export class OrdersService {
@@ -20,6 +21,8 @@ export class OrdersService {
     private readonly orderRulesService: OrderRulesService,
 
     private readonly orderPreparationEstimateService: OrderPreparationEstimateService,
+
+    private readonly orderPriorityService: OrderPriorityService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<OrderEntity> {
@@ -33,7 +36,7 @@ export class OrdersService {
       );
     }
 
-    //Primero creo, luego guardo
+    // Primero creo, luego guardo
     const order = this.ordersRepository.create({
       item: createOrderDto.item,
       quantity: createOrderDto.quantity,
@@ -41,7 +44,7 @@ export class OrdersService {
       customer,
     });
 
-    //Guardo en la base de datos y retorno el objeto guardado
+    // Guardo en la base de datos y retorno el objeto guardado
     return this.ordersRepository.save(order);
   }
 
@@ -83,7 +86,7 @@ export class OrdersService {
   }
 
   async markAsReady(id: number): Promise<OrderEntity> {
-    const order = await this.findOne(id); //Fue y busco la orden y si la encuentra la pone en la constante y sino marca error
+    const order = await this.findOne(id); // Fue y busco la orden y si la encuentra la pone en la constante y sino marca error
     this.orderRulesService.ensureCanBeMarkedAsReady(order);
     order.status = 'ready';
 
@@ -101,7 +104,6 @@ export class OrdersService {
 
   async findRecentPending(): Promise<OrderEntity[]> {
     return this.ordersRepository.find({
-      // where: { quantity: LessThan(2) },
       where: { status: 'pending' },
       order: { createdAt: 'ASC' },
       take: 2,
@@ -109,5 +111,24 @@ export class OrdersService {
         customer: true,
       },
     });
+  }
+
+  async getPriority(id: number): Promise<{
+    orderId: number;
+    status: string;
+    quantity: number;
+    priority: string;
+    message: string;
+  }> {
+    const order = await this.findOne(id);
+    const classification = this.orderPriorityService.classify(order);
+
+    return {
+      orderId: order.id,
+      status: order.status,
+      quantity: order.quantity,
+      priority: classification.priority,
+      message: classification.message,
+    };
   }
 }
