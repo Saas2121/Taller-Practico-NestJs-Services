@@ -86,7 +86,7 @@ export class OrdersService {
   }
 
   async markAsReady(id: number): Promise<OrderEntity> {
-    const order = await this.findOne(id); // Fue y busco la orden y si la encuentra la pone en la constante y sino marca error
+    const order = await this.findOne(id);
     this.orderRulesService.ensureCanBeMarkedAsReady(order);
     order.status = 'ready';
 
@@ -129,6 +129,36 @@ export class OrdersService {
       quantity: order.quantity,
       priority: classification.priority,
       message: classification.message,
+    };
+  }
+
+  async findPendingQueue(): Promise<{
+    totalPending: number;
+    showing: number;
+    orders: OrderEntity[];
+  }> {
+
+    const orders = await this.ordersRepository.find({
+      where: {
+        status: 'pending',
+      },
+      relations: {
+        customer: true,
+      },
+      order: {
+        id: 'ASC',
+      },
+      take: 5,
+    });
+
+    const totalPending = await this.ordersRepository.countBy({
+      status: 'pending',
+    });
+
+    return {
+      totalPending,
+      showing: orders.length,
+      orders,
     };
   }
 }
