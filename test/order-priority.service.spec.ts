@@ -1,5 +1,5 @@
-import { OrderEntity } from './entities/order.entity';
-import { OrderPriorityService } from './order-priority.service';
+import { OrderEntity } from '../src/orders/entities/order.entity';
+import { OrderPriorityService } from '../src/orders/order-priority.service';
 
 describe('OrderPriorityService', () => {
   let service: OrderPriorityService;
