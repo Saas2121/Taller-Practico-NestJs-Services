@@ -5,12 +5,14 @@ import { Repository } from 'typeorm';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderRulesService } from './order-rules/order-rules.service';
 import { OrderPreparationEstimateService } from './order-preparation-estimate/order-preparation-estimate.service';
+import { OrderPriorityService } from './order-priority.service';
 export declare class OrdersService {
     private readonly ordersRepository;
     private readonly customersRepository;
     private readonly orderRulesService;
     private readonly orderPreparationEstimateService;
-    constructor(ordersRepository: Repository<OrderEntity>, customersRepository: Repository<CustomerEntity>, orderRulesService: OrderRulesService, orderPreparationEstimateService: OrderPreparationEstimateService);
+    private readonly orderPriorityService;
+    constructor(ordersRepository: Repository<OrderEntity>, customersRepository: Repository<CustomerEntity>, orderRulesService: OrderRulesService, orderPreparationEstimateService: OrderPreparationEstimateService, orderPriorityService: OrderPriorityService);
     create(createOrderDto: CreateOrderDto): Promise<OrderEntity>;
     findAll(): Promise<OrderEntity[]>;
     findOne(id: number): Promise<OrderEntity>;
@@ -22,4 +24,16 @@ export declare class OrdersService {
         estimatedMinutes: number;
     }>;
     findRecentPending(): Promise<OrderEntity[]>;
+    getPriority(id: number): Promise<{
+        orderId: number;
+        status: string;
+        quantity: number;
+        priority: string;
+        message: string;
+    }>;
+    findPendingQueue(): Promise<{
+        totalPending: number;
+        showing: number;
+        orders: OrderEntity[];
+    }>;
 }

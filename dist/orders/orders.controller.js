@@ -15,8 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrdersController = void 0;
 const common_1 = require("@nestjs/common");
 const create_order_dto_1 = require("./dto/create-order.dto");
-const orders_service_1 = require("./orders.service");
 const update_order_dto_1 = require("./dto/update-order.dto");
+const orders_service_1 = require("./orders.service");
 let OrdersController = class OrdersController {
     ordersService;
     constructor(ordersService) {
@@ -25,20 +25,29 @@ let OrdersController = class OrdersController {
     findAll() {
         return this.ordersService.findAll();
     }
-    update(id, updateOrderDto) {
-        return this.ordersService.update(Number(id), updateOrderDto);
+    findRecentPending() {
+        return this.ordersService.findRecentPending();
     }
-    create(createOrderDto) {
-        return this.ordersService.create(createOrderDto);
+    findPendingQueue() {
+        return this.ordersService.findPendingQueue();
     }
-    markAsReady(id) {
-        return this.ordersService.markAsReady(Number(id));
+    getPriority(id) {
+        return this.ordersService.getPriority(Number(id));
     }
     estimatePreparationTime(id) {
         return this.ordersService.estimatePreparationTime(Number(id));
     }
-    findRecentPending() {
-        return this.ordersService.findRecentPending();
+    findOne(id) {
+        return this.ordersService.findOne(Number(id));
+    }
+    create(createOrderDto) {
+        return this.ordersService.create(createOrderDto);
+    }
+    update(id, updateOrderDto) {
+        return this.ordersService.update(Number(id), updateOrderDto);
+    }
+    markAsReady(id) {
+        return this.ordersService.markAsReady(Number(id));
     }
 };
 exports.OrdersController = OrdersController;
@@ -49,27 +58,24 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    (0, common_1.Get)('pending'),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_order_dto_1.UpdateOrderDto]),
+    __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], OrdersController.prototype, "update", null);
+], OrdersController.prototype, "findRecentPending", null);
 __decorate([
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    (0, common_1.Get)('pending-queue'),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_order_dto_1.CreateOrderDto]),
+    __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], OrdersController.prototype, "create", null);
+], OrdersController.prototype, "findPendingQueue", null);
 __decorate([
-    (0, common_1.Patch)(':id/ready'),
+    (0, common_1.Get)(':id/priority'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
-], OrdersController.prototype, "markAsReady", null);
+], OrdersController.prototype, "getPriority", null);
 __decorate([
     (0, common_1.Get)(':id/estimate'),
     __param(0, (0, common_1.Param)('id')),
@@ -78,11 +84,34 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "estimatePreparationTime", null);
 __decorate([
-    (0, common_1.Get)('pending'),
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
-], OrdersController.prototype, "findRecentPending", null);
+], OrdersController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_order_dto_1.CreateOrderDto]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_order_dto_1.UpdateOrderDto]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "update", null);
+__decorate([
+    (0, common_1.Patch)(':id/ready'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "markAsReady", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, common_1.Controller)('orders'),
     __metadata("design:paramtypes", [orders_service_1.OrdersService])

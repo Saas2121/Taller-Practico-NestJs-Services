@@ -1,0 +1,17 @@
+Declaración de uso de Inteligencia Artificial
+
+Durante el desarrollo del taller utilicé la herramienta Gemini como tutor de apoyo conceptual y de diagnóstico técnico, apoyándome principalmente en las guías del curso y los repositorios vistos en clase. Le fui consultando dudas muy puntuales sobre errores específicos que me iban saliendo, como el problema de conexión que tuve en DBeaver con el mensaje de conexión rechazada por la diferencia entre el puerto expuesto y el puerto del archivo de entorno, y también le pregunté si la forma en que estaba separando las clases respetaba la separación de responsabilidades y la inyección de dependencias. La herramienta me fue verificando si mi lógica y la estructura de mis métodos estaban completas, explicándome los conceptos detrás de cada error y guiándome en cómo ordenar las rutas en el controlador para evitar choques entre rutas fijas y parámetros dinámicos, en lugar de darme código cerrado. A partir de esas aclaraciones y revisando los ejemplos de las guías, tomé la decisión de mantener el servicio de prioridad aislado sin persistencia, alinear la configuración de puertos en las variables de entorno, ubicar la ruta de la cola antes de la ruta por identificador y crear las pruebas unitarias instanciando el servicio directamente en memoria con Jest
+
+
+Preguntas de cierre
+
+1. ¿Por qué OrderPriorityService no necesita un repository?
+Porque este servicio solo hace un cálculo lógico en memoria y no guarda ni busca datos en PostgreSQL. Como vimos con la analogía de clase, OrdersService es el que va a la bodega a sacar la orden, y este servicio simplemente la revisa en la mesa y dice qué prioridad tiene. Al no tener que hacer consultas a las tablas, no necesita conectarse a TypeORM ni inyectar ningún repositorio.   
+2. ¿Qué responsabilidad tiene OrdersService al consultar la prioridad?
+Es el encargado de coordinar todo el flujo del pedido. Primero usa findOne(id) para traer la orden de la base de datos y botar el error 404 si no existe. Luego le pasa esa orden al método classify de OrderPriorityService y, con el resultado que recibe, arma el objeto final con el id, la cantidad, el estado, la prioridad y el mensaje para mandarlo al controller.   
+3. ¿Cuál es la diferencia entre totalPending y showing?
+totalPending es el número total de pedidos pendientes guardados en la tabla de la base de datos usando countBy, mientras que showing es la cantidad de pedidos que de verdad estamos mostrando en el arreglo de la respuesta. Como en la consulta pusimos take: 5, showing nunca va a ser mayor a cinco, aunque totalPending diga que hay veinte o más pedidos esperando.   
+4. ¿Por qué las pruebas de prioridad pueden ejecutarse sin PostgreSQL?
+Porque OrderPriorityService no depende de la base de datos ni tiene nada inyectado en su constructor. En la prueba con Jest solo hacemos un new OrderPriorityService(), le pasamos un objeto plano inventado con su cantidad y estado (usando as OrderEntity), y revisamos con expect qué devuelve. Todo pasa directo en la memoria de la máquina sin prender Docker.   
+5. ¿Qué problema de diseño aparecería si la prioridad se calculara en el controller?
+Se revolverían las responsabilidades, porque el controller solo debe recibir la petición web, sacar los datos y responder. Si metemos la lógica de negocio ahí, no podríamos reutilizar ese cálculo desde otro servicio o proceso interno sin duplicar código. Además, para probar esa regla obligaría a levantar módulos HTTP pesados en vez de hacer una prueba unitaria rápida.   
